@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Insurance Trend Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <h2>Monthly Insurance Policies Trend</h2>
+    <canvas id="insuranceChart"></canvas>
+
+    <script>
+        const ctx = document.getElementById('insuranceChart').getContext('2d');
+        let chart;
+
+        async function fetchData() {
+            const response = await fetch("http://localhost:5000/api/insurance-trend");
+            const data = await response.json();
+            
+            if (!Array.isArray(data) || data.length === 0) {
+        console.error("No data received from API");
+        return;
+    }
+            const labels = data.map(d => `${d._id.year}-${String(d._id.month).padStart(2, '0')}`);
+            const counts = data.map(d => d.count);
+
+            renderChart(labels, counts);
+        }
+
+        function renderChart(labels, counts) {
+            if (chart) chart.destroy(); // Destroy previous chart before re-rendering
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Insurance Policies Issued',
+                        data: counts,
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.2)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { title: { display: true, text: 'Month' } },
+                        y: { title: { display: true, text: 'Number of Policies' } }
+                    }
+                }
+            });
+        }
+
+        fetchData();
+    </script>
+
+</body>
+</html>

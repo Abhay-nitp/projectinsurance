@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Policy | XYZ Insurance</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <!-- <div class="logo">🚗 Vaahaan Insurance</div> -->
+        <div class="logo-container">
+            <img class="logo" src="abc_logo.png" alt="Vaahaan Insurance Logo">
+            <div class="brand-name">Vaahaan Insurance</div>
+        </div>
+        <ul>
+            <li id="signup"><a href="register.html" class="btn-primary">Sign Up</a></li>
+            <li id="login"><a href="login.html" class="btn-secondary">Login</a></li>
+            <li id="account" style="display: none;"><a href="dashboard.html" class="btn-primary">Account</a></li>
+            <li id="logout" style="display: none;"><a href="" class="btn-secondary" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Buy Policy Form -->
+    <section class="buy-policy">
+        <h2>Buy Your Vehicle Insurance Policy</h2>
+        <p>Complete the form below to finalize your insurance policy.</p>
+
+        <form id="policyForm">
+            <div class="form-group">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="vehicleType">Vehicle Type:</label>
+                <input type="text" id="vehicleType" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="PlanId">Plan ID:</label>
+                <input type="text" id="planId" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="PlanId">Plan ID:</label>
+                <input type="text" id="vehicleId" readonly>
+            </div>
+
+            
+
+            <div class="form-group">
+                <label for="vehicleAge">Vehicle Age:</label>
+                <input type="text" id="vehicleAge" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="coverage">Coverage Type:</label>
+                <input type="text" id="coverage" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="zipCode">ZIP Code:</label>
+                <input type="text" id="zipCode" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="finalQuote">Quoted Price:</label>
+                <input type="text" id="finalQuote" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="paymentMethod">Payment Method:</label>
+                <select id="paymentMethod" required>
+                    <option value="creditCard">Credit Card</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="bankTransfer">Bank Transfer</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-cta"  onclick = "window.location.href ='payment.html'" >Payment</button>
+
+        </form>
+
+        <div id="confirmationMessage" class="hidden">
+            <!-- //<h3>✅ Policy Generated Successfully!</h3> -->
+            <p>Your policy PDF has been generated and stored securely.</p>
+           
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Vaahaan Insurance | All Rights Reserved</p>
+    </footer>
+
+    <!-- <script src="policy.js"></script> -->
+
+
+
+    
+
+    <script >
+
+        
+        document.addEventListener("DOMContentLoaded", async function () {
+    try {
+        const response = await fetch("http://localhost:5000/api/auth/me", {
+            method: "GET",
+            credentials: "include", // Send cookies with request
+        });
+
+        if (response.ok) {
+            const user = await response.json();
+            console.log("Auth response:", user); // ✅ Log API response
+            // Hide login/signup, show account/logout
+            document.getElementById("signup").style.display = "none";
+            document.getElementById("login").style.display = "none";
+            document.getElementById("account").style.display = "inline";
+            document.getElementById("logout").style.display = "inline";
+        } else {
+            // Show login/signup if user is NOT authenticated
+            document.getElementById("signup").style.display = "inline";
+            document.getElementById("login").style.display = "inline";
+            document.getElementById("account").style.display = "none";
+            document.getElementById("logout").style.display = "none";
+        }
+    } catch (error) {
+        console.error("Error fetching user:", error);
+    }
+});
+
+const urlParams = new URLSearchParams(window.location.search);
+const quoteId = urlParams.get("quoteId");
+
+console.log("Quote ID:", quoteId); // Debugging output
+
+document.addEventListener("DOMContentLoaded", async function () {
+    try {
+        const userResponse = await fetch("http://localhost:5000/api/auth/me", {
+            method: "GET",
+            credentials: "include",
+        });
+
+        if (!userResponse.ok) {
+            console.log("User not authenticated");
+            return;
+        }
+
+       const user = await userResponse.json();
+        console.log("User:", user);
+
+        // Fetch policy details from MongoDB using user ID
+        const policyResponse = await fetch(`http://localhost:5000/api/quote/${quoteId}`)||await fetch(`http://localhost:5000/api/quote/quote/${userId}`);
+        if (!policyResponse.ok) {
+            console.log("No policy found");
+            return;
+        }
+
+        const policy = await policyResponse.json();
+        console.log("Policy Data:", policy);
+
+        // Populate form fields
+        //document.getElementById("fullName").value = policy.fullName;
+        //document.getElementById("email").value = policy.email;
+        //document.getElementById("phone").value = policy.phone;
+        document.getElementById("vehicleId").value = policy.plate;
+        document.getElementById("planId").value = policy.planid;
+        document.getElementById("vehicleType").value = policy.vehicleType;
+        document.getElementById("vehicleAge").value = policy.vehicleAge;
+        document.getElementById("coverage").value = policy.coverageType;
+        document.getElementById("zipCode").value = policy.zipCode;
+        document.getElementById("finalQuote").value = `$${policy.finalQuote.toFixed(2)}`;
+    } catch (error) {
+        console.error("Error fetching policy details:", error);
+    }
+});
+
+
+
+
+document.getElementById("policyForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const policyData = {
+        fullName: document.getElementById("fullName").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        planId: document.getElementById("planId").value,
+        vehicleType: document.getElementById("vehicleType").value,
+        vehicle:document.getElementById("vehicleId").value,
+        vehicleAge: document.getElementById("vehicleAge").value,
+        coverage: document.getElementById("coverage").value,
+        zipCode: document.getElementById("zipCode").value,
+        finalQuote: parseFloat(document.getElementById("finalQuote").value.replace("$", "")), // Convert price to number
+        paymentMethod: document.getElementById("paymentMethod").value
+    };
+
+    try {
+        const response = await fetch("http://localhost:5000/api/insurance", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': 'Bearer ' + localStorage.getItem('token') // If using JWT for authentication
+            },
+            body: JSON.stringify(policyData),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert("Policy Created Successfully!");
+           // window.location.href = "confirmation.html"; // Redirect user
+        } else {
+            alert(`Error: ${result.message}`);
+        }
+    } catch (error) {
+        console.error("Error submitting policy:", error);
+        alert("An error occurred while submitting your policy.");
+    }
+});
+
+//     document.addEventListener("DOMContentLoaded", function () {
+//     const quoteData = JSON.parse(localStorage.getItem("quoteData"));
+
+//     if (quoteData) {
+//         document.getElementById("vehicleType").value = quoteData.vehicleType;
+//         document.getElementById("vehicleAge").value = quoteData.vehicleAge;
+//         document.getElementById("coverage").value = quoteData.coverage;
+//         document.getElementById("zipCode").value = quoteData.zipCode;
+//         const email = document.getElementById("email").value = quoteData.email;
+//         const phone = document.getElementById("phone").value = quoteData.phone;
+//         document.getElementById("finalQuote").value = `$${quoteData.finalQuote.toFixed(2)}`;
+//     }
+// });
+
+// document.getElementById("policyForm").addEventListener("submit", function (event) {
+//     event.preventDefault();
+
+//     const { jsPDF } = window.jspdf;
+//     const doc = new jsPDF();
+
+//     // Get user details
+//     const fullName = document.getElementById("fullName").value;
+//     const email = document.getElementById("email").value;
+//     const phone = document.getElementById("phone").value;
+//     const vehicleType = document.getElementById("vehicleType").value;
+//     const vehicleAge = document.getElementById("vehicleAge").value;
+//     const coverage = document.getElementById("coverage").value;
+//     const zipCode = document.getElementById("zipCode").value;
+//     const finalQuote = document.getElementById("finalQuote").value;
+//     const paymentMethod = document.getElementById("paymentMethod").value;
+    
+
+//     // Generate PDF
+//     // doc.setFont("helvetica", "bold");
+//     // doc.setFontSize(16);
+//     // doc.text("XYZ Insurance - Policy Confirmation", 20, 20);
+
+//     // doc.setFontSize(12);
+//     // doc.setFont("helvetica", "normal");
+//     // doc.text(`Full Name: ${fullName}`, 20, 40);
+//     // doc.text(`Email: ${email}`, 20, 50);
+//     // doc.text(`Phone: ${phone}`, 20, 60);
+//     // doc.text(`Vehicle Type: ${vehicleType}`, 20, 70);
+//     // doc.text(`Vehicle Age: ${vehicleAge}`, 20, 80);
+//     // doc.text(`Coverage Type: ${coverage}`, 20, 90);
+//     // doc.text(`ZIP Code: ${zipCode}`, 20, 100);
+//     // doc.text(`Quoted Price: ${finalQuote}`, 20, 110);
+//     // doc.text(`Payment Method: ${paymentMethod}`, 20, 120);
+
+//     // doc.text("Thank you for choosing XYZ Insurance!", 20, 140);
+
+//     // Save PDF
+//     // doc.save(`${fullName}_Policy.pdf`);
+
+//     // document.getElementById("confirmationMessage").classList.remove("hidden");
+
+
+
+    
+// });
+
+    </script>
+</body>
+</html>
+<style>/* General Styles */
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f9;
+        color: #333;
+    }
+    
+    /* Navigation */
+    nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #007bff;
+        padding: 15px 50px;
+        color: #fff;
+    }
+    
+    nav .logo {
+        font-size: 24px;
+        font-weight: bold;
+    }
+    
+    nav ul {
+        list-style: none;
+        display: flex;
+        gap: 20px;
+    }
+    
+    nav ul li {
+        display: inline;
+    }
+    
+    nav ul li a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    
+    .btn-primary {
+        background-color: #28a745;
+        padding: 8px 15px;
+        border-radius: 5px;
+        color: #fff;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background-color: #ff5722;
+        padding: 8px 15px;
+        border-radius: 5px;
+        color: #fff;
+        text-decoration: none;
+    }
+    
+    /* Buy Policy Section */
+    .buy-policy {
+        max-width: 600px;
+        background: #fff;
+        padding: 30px;
+        margin: 40px auto;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .buy-policy h2 {
+        text-align: center;
+        color: #007bff;
+    }
+    
+    .buy-policy p {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #555;
+    }
+    
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    
+    /* CTA Button */
+    .btn-cta {
+        display: block;
+        width: 100%;
+        background-color: #007bff;
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: 0.3s;
+    }
+    
+    .btn-cta:hover {
+        background-color: #0056b3;
+    }
+    
+    /* Confirmation Message */
+    /* #confirmationMessage {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+        padding: 15px;
+        background: #e9f7e9;
+        border: 1px solid #28a745;
+        border-radius: 5px;
+        color: #155724;
+    } */
+    
+    #downloadPDF {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 10px 15px;
+        background-color: #28a745;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+    
+    #downloadPDF:hover {
+        background-color: #218838;
+    }
+    
+    /* Footer */
+    footer {
+        text-align: center;
+        padding: 15px;
+        background-color: #333;
+        color: white;
+        margin-top: 50px;
+    }
+    .logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 50px;
+    width: auto;
+    margin-right: 10px;
+}
+
+.brand-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+    </style>

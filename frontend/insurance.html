@@ -1,0 +1,226 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance Portal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Insurance Portal</h1>
+
+        <!-- Buy Insurance Form -->
+        <section id="buy-insurance">
+            <h2>Buy Insurance</h2>
+            <form id="buy-insurance-form">
+                <input type="text" id="vehicleId" placeholder="Vehicle ID" required>
+                <input type="text" id="coverageType" placeholder="Coverage Type (basic, comprehensive, premium)" required>
+                <input type="date" id="startDate" required>
+                <input type="date" id="endDate" required>
+                <input type="number" id="premiumAmount" placeholder="Premium Amount" required>
+                <button type="submit">Buy Insurance</button>
+            </form>
+        </section>
+
+        <!-- My Policies Section -->
+        <section id="my-policies">
+            <h2>My Policies</h2>
+            <button id="view-my-policies">View My Policies</button>
+            <ul id="policies-list"></ul>
+        </section>
+
+        <!-- Admin Section -->
+        <section id="admin">
+            <h2>Admin Actions</h2>
+            <button id="view-all-policies">View All Policies</button>
+            <ul id="all-policies-list"></ul>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+}
+
+form input, form button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#policies-list, #all-policies-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#policies-list li, #all-policies-list li {
+    background-color: #f8f9fa;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 4px;
+}
+
+</style>
+
+<script>
+    document.getElementById('buy-insurance-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const vehicleId = document.getElementById('vehicleId').value;
+    const coverageType = document.getElementById('coverageType').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const premiumAmount = document.getElementById('premiumAmount').value;
+
+    const claimData = {
+        vehicleId,
+        coverageType,
+        startDate,
+        endDate,
+        premiumAmount
+    };
+
+    // Send the request to create insurance policy
+    fetch('http://localhost:5000/api/insurance', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')  // Assuming JWT token is stored in localStorage
+        },
+        body: JSON.stringify(claimData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Insurance submitted successfully!');
+    })
+    .catch(error => {
+        alert('Error submitting insurance: ' + error.message);
+    });
+});
+
+// Fetch My Policies
+document.getElementById('view-my-policies').addEventListener('click', function () {
+    fetch('http://localhost:5000/api/insurance/my-policies', {
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const policiesList = document.getElementById('policies-list');
+        policiesList.innerHTML = '';
+
+        data.forEach(policy => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <strong>Policy Number:</strong> ${policy.policyNumber}<br>
+                <strong>Coverage:</strong> ${policy.coverageType}<br>
+                <strong>Vehicle:</strong> ${policy.vehicle.plateNumber}<br>
+                <strong>Status:</strong> ${policy.status}
+            `;
+            policiesList.appendChild(li);
+        });
+    })
+    .catch(error => {
+        alert('Error fetching policies: ' + error.message);
+    });
+});
+
+// Admin view all policies
+document.getElementById('view-all-policies').addEventListener('click', function () {
+    fetch('/api/insurance', {
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const policiesList = document.getElementById('all-policies-list');
+        policiesList.innerHTML = '';
+
+        data.forEach(policy => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <strong>Policy Number:</strong> ${policy.policyNumber}<br>
+                <strong>Owner:</strong> ${policy.owner.name}<br>
+                <strong>Vehicle:</strong> ${policy.vehicle.plateNumber}<br>
+                <strong>Status:</strong> ${policy.status}<br>
+                <button onclick="approvePolicy('${policy._id}')">Approve</button>
+                <button onclick="rejectPolicy('${policy._id}')">Reject</button>
+            `;
+            policiesList.appendChild(li);
+        });
+    })
+    .catch(error => {
+        alert('Error fetching policies: ' + error.message);
+    });
+});
+
+// Admin Approve Policy
+function approvePolicy(policyId) {
+    fetch(`/api/insurance/${policyId}/approve`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Policy approved');
+        location.reload(); // Reload the policies list
+    })
+    .catch(error => {
+        alert('Error approving policy: ' + error.message);
+    });
+}
+
+// Admin Reject Policy
+function rejectPolicy(policyId) {
+    fetch(`/api/insurance/${policyId}/reject`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Policy rejected');
+        location.reload(); // Reload the policies list
+    })
+    .catch(error => {
+        alert('Error rejecting policy: ' + error.message);
+    });
+}
+
+</script>

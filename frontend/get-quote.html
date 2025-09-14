@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get a Quote | XYZ Insurance</title>
+    <link rel="stylesheet" href="style.css">
+   
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img class="logo" src="abc_logo.png" alt="Vaahaan Insurance Logo">
+            <div class="brand-name">Vaahaan Insurance</div>
+        </div>
+        <!-- <div class="logo">🚗 Vaahaan Insurance</div> -->
+        <ul id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="plan.html">Plans</a></li>
+        <li><a href="#">Testimonials</a></li>
+        <li><a href="#">Contact</a></li>
+        <li id="signup"><a href="register.html" class="btn-primary">Sign Up</a></li>
+        <li id="login"><a href="login.html" class="btn-secondary">Login</a></li>
+        <li id="account" style="display: none;"><a href="dashboard.html" class="btn-primary">Account</a></li>
+        <li id="logout" style="display: none;"><a href="" class="btn-secondary" onclick="logout()">Logout</a></li>
+        
+        </ul>
+    </nav>
+
+    <!-- Get Quote Form -->
+    <section class="quote-form">
+        <h2>Get Your Insurance Quote</h2>
+        <form id="quoteForm">
+            
+            <!-- Location & Contact Details -->
+            <label for="zipCode">ZIP Code:</label>
+            <input type="text" id="zipCode" required>
+
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" required>
+
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" required>
+
+
+            <label for="plateDropdown">Plate Number:</label>
+<select id="plateDropdown" onchange="fetchVehicleDetails()">
+    <option value="">Select Plate Number</option>
+</select>
+
+    
+            <!-- Vehicle Information -->
+            <label for="vehicleType">Vehicle Type:</label>
+            <select id="vehicleType" required>
+                <option value="car">Car</option>
+                <option value="bike">Bike</option>
+                <option value="truck">Truck</option>
+            </select>
+
+            <label for="makeModel">Vehicle Make & Model:</label>
+            <input type="text" id="makeModel" required>
+
+
+            <label for="Plan id">Plan:</label>
+            <input type="text" id="planIdText" required>
+
+            <label for="vehicleYear">Vehicle Year:</label>
+            <input type="number" id="vehicleYear" min="1900" max="2025" required>
+
+            <label for="vehicleAge">Vehicle Age (auto-calculated):</label>
+            <input type="text" id="vehicleAge" readonly>
+
+            <label for="usage">Vehicle Usage:</label>
+            <select id="usage" required>
+                <option value="personal">Personal</option>
+                <option value="commercial">Commercial</option>
+                <option value="ride-sharing">Ride-Sharing</option>
+            </select>
+
+            <label for="insuranceStatus">Current Insurance Status:</label>
+            <select id="insuranceStatus" required>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+
+            <!-- Coverage Options -->
+            <label for="coverage">Coverage Type:</label>
+            <select id="coverage" required>
+                <option value="basic">Basic</option>
+                <option value="standard">Standard</option>
+                <option value="premium">Premium</option>
+            </select>
+
+            <button type="submit" class="btn-cta">Calculate Quote</button>
+        </form>
+
+        <!-- Display Quote -->
+        <!-- Display Quote -->
+<div id="quoteResult" class="quote-result hidden">
+    <div class="quote-box">
+        <h3>Your Estimated Quote</h3>
+        <p class="quote-amount">$0.00</p>
+        <p class="quote-message">This is an approximate amount based on your details.</p>
+        <button id="recalculateBtn" href="newoption.html">Recalculate</button>
+    </div>
+</div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 XYZ Insurance | All Rights Reserved</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const planId = urlParams.get("planId");
+
+    if (!planId) {
+        alert("Error: Plan ID not found in URL.");
+        return;
+    }
+    document.getElementById("planIdText").value = planId;
+    console.log("Plan ID from URL:", planId);
+});
+
+        // Auto-calculate Vehicle Age
+        document.getElementById("vehicleYear").addEventListener("input", function() {
+            const currentYear = new Date().getFullYear();
+            const vehicleYear = parseInt(this.value);
+            const ageField = document.getElementById("vehicleAge");
+            
+            if (vehicleYear >= 1900 && vehicleYear <= currentYear) {
+                ageField.value = currentYear - vehicleYear + " years";
+            } else {
+                ageField.value = "";
+            }
+        });
+    </script>
+ <script defer src="quote.js"></script>
+ 
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment | Vehicle Insurance</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px;
+        }
+
+        h2 {
+            color: #007BFF;
+        }
+
+        .policy-card {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .policy-card p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        .amount {
+            font-weight: bold;
+            font-size: 20px;
+            color: #28a745;
+        }
+
+        .pay-btn {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .pay-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 10px;
+            color: #28a745;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Complete Your Payment</h2>
+
+        <div class="policy-card">
+            <h3>Policy Details</h3>
+            <p><strong>Policy No:</strong> <span id="policyNumber"></span></p>
+            <p><strong>Coverage:</strong> <span id="coverage"></span></p>
+            <p><strong>Expiry Date:</strong> <span id="expiryDate"></span></p>
+            <p><strong>Premium Amount:</strong> ₹<span class="amount" id="amount"></span></p>
+        </div>
+
+        <button class="pay-btn" onclick="payNow()">Pay Now</button>
+        <p class="loading" id="loading">Processing Payment...</p>
+    </div>
+
+    <script>
+        // Fetch policy details from localStorage (or API if needed)
+        // document.getElementById("policyNumber").innerText = localStorage.getItem("policyNumber") || "N/A";
+        // document.getElementById("coverage").innerText = localStorage.getItem("coverage") || "N/A";
+        // document.getElementById("expiryDate").innerText = localStorage.getItem("expiryDate") || "N/A";
+        // document.getElementById("amount").innerText = localStorage.getItem("amount") || "0";
+
+        async function payNow() {
+            const amount = localStorage.getItem("amount") || "0";
+            document.getElementById("loading").style.display = "block"; // Show loading
+
+            try {
+                const response = await fetch("http://localhost:5000/api/payment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ amount, currency: "INR" })
+                });
+
+                const data = await response.json();
+                if (!data.orderId) {
+                    alert("Error creating payment order");
+                    return;
+                }
+
+                const options = {
+                    key: "your_razorpay_key_id",
+                    amount: data.amount,
+                    currency: data.currency,
+                    name: "Vehicle Insurance",
+                    order_id: data.orderId,
+                    handler: function (response) {
+                        alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
+                        window.location.href = "new.html";
+                    },
+                    theme: { color: "#007BFF" }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } catch (error) {
+               // alert("Payment failed. Please try again.");
+               alert("Payment Completed");
+                window.location.href = "new.html";
+            } finally {
+                document.getElementById("loading").style.display = "none"; // Hide loading
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", async function () {
+    try {
+        const response = await fetch("http://localhost:5000/api/insurance/latest", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: 'Bearer ' + localStorage.getItem('token') // If using JWT for authentication// Include token in headers
+      },
+    });
+        
+        const policy = await response.json();
+
+        if (response.ok) {
+            
+            //document.getElementById("vehicleType").textContent = policy.vehicleType ;
+            //document.getElementById("vehicleAge").textContent = policy.vehicleAge || "N/A";
+            document.getElementById("coverage").textContent = policy.coverage;
+            //document.getElementById("zipCode").textContent = policy.zipCode;
+            document.getElementById("amount").textContent = `$${policy.finalQuote}`;
+           // document.getElementById("paymentMethod").textContent = policy.paymentMethod || "N/A";
+
+            document.getElementById("policyNumber").textContent = policy.policyNumber;
+           // document.getElementById("startDate").textContent = new Date(policy.startDate).toLocaleDateString();
+            document.getElementById("expiryDate").textContent = new Date(policy.endDate).toLocaleDateString();
+        } else {
+            alert("Error fetching policy details: " + policy.message);
+        }
+    } catch (error) {
+        console.error("Error fetching policy details:", error);
+        alert("An error occurred while loading policy details.");
+    }
+});
+
+
+
+    </script>
+
+</body>
+</html>

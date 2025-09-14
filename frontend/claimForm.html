@@ -1,0 +1,75 @@
+<!-- views/claimForm.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Form</title>
+    <link rel="stylesheet" href="claim.css">
+</head>
+<body>
+    
+    <!-- Navbar -->
+    <nav>
+        <div class="logo-container">
+            <img class="logo" src="abc_logo.png" alt="Vaahaan Insurance Logo">
+            <div class="brand-name">Vaahaan Insurance</div>
+        </div>
+        <!-- <div class="logo">🚗 Vaahaaan Insurance</div> -->
+        <ul id="navLinks">
+        <li><a href="#">Home</a></li>
+        <!-- <li><a href = "onclick='redirectToQuote()'">Plans</a></li> -->
+        <li><a href="#">Testimonials</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="claimForm.html">Claim</a></li>
+        <li id="signup"><a href="register.html" class="btn-primary">Sign Up</a></li>
+        <li id="login"><a href="login.html" class="btn-secondary">Login</a></li>
+        <li id="account" style="display: none;"><a href="dashboard.html" class="btn-primary">Account</a></li>
+        <li id="logout" style="display: none;"><a href="" class="btn-secondary" onclick="logout()">Logout</a></li>
+    </ul>
+    </nav>
+    
+    <div class="container">
+        <h1>Claim Form</h1>
+        <form id="claimForm">
+            <div class="form-group">
+                <label for="policy_id">Policy ID</label>
+                <!-- <input type="text" id="policy_id" name="policy_id" required> -->
+                <select id="policy_id">
+                    <option>Loading...</option>
+                   </select>
+            </div>
+
+            <!-- <label for="insuranceDropdown">Select Insurance:</label>
+             <select id="insuranceDropdown">
+              <option>Loading...</option>
+             </select> -->
+            <div class="form-group">
+                <label for="claim_reason">Claim Reason</label>
+                <input type="text" id="claim_reason" name="claim_reason" required>
+            </div>
+            <div class="form-group">
+                <label for="claim_amount">Claim Amount</label>
+                <input type="number" id="claim_amount" name="claim_amount" required>
+            </div>
+            <div class="form-group">
+                <label for="claim_status">Claim Status</label>
+                <select id="claim_status" name="claim_status">
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="documents">Document URL</label>
+                <input type="text" id="documents" name="documents" required>
+            </div>
+            <button type="submit">Submit Claim</button>
+        </form>
+        <!-- Add a container to display success/error message -->
+        <div id="message" style="margin-top: 20px;"></div>
+    </div>
+    <script src="claim.js"></script>
+    
+</body>
+</html>

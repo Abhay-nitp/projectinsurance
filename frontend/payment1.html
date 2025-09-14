@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <script src="payment.js"></script>
+</head>
+<script>
+    async function processPayment() {
+// Get policyId and amount from URL
+const urlParams = new URLSearchParams(window.location.search);
+const policyId = urlParams.get("policyId");
+const amount = urlParams.get("amount");
+
+if (!policyId || !amount) {
+    alert("Invalid payment details.");
+    return;
+}
+
+// Simulate payment processing
+alert("Payment successful! Renewing policy...");
+
+// Call API to renew the policy after payment
+await renewPolicyAPI(policyId);
+}
+
+async function renewPolicyAPI(policyId) {
+const token = localStorage.getItem("token");
+
+try {
+    const response = await fetch(`http://localhost:5000/api/insurance/renew/${policyId}`, {
+        method: "PUT",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const data = await response.json();
+    console.log("Renewal response:", data);
+
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to renew policy");
+    }
+
+    alert("Policy renewed successfully!");
+    window.location.href = "dashboard.html"; // Redirect to dashboard after renewal
+} catch (error) {
+    console.error("Error renewing policy:", error);
+    alert(`Error renewing policy: ${error.message}`);
+}
+}
+
+
+</script>
+<body>
+    <h1>Complete Payment</h1>
+    <p>Amount: $<span id="amount"></span></p>
+    <p> Renew Insurance </p>
+    <p> InsuranceID - <span id="policyId"></span></p>
+    <button onclick="processPayment()">Pay Now</button>
+    
+    
+</body>
+</html>

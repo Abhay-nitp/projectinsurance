@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+ 
+
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo-container">
+            <img class="logo" src="abc_logo.png" alt="Vaahaan Insurance Logo">
+            <div class="brand-name">Vaahaan Insurance</div>
+        </div>
+    
+        <!-- <button id="menu-toggle">☰</button> -->
+        <ul>
+            <li><a href="#" onclick="showSection('dashboard')">📊 Dashboard</a></li>
+            <li><a href="#" onclick="showSection('policies')">📜 Policies</a></li>
+            <li><a href="#" onclick="showSection('plans')">📜 Plan</a></li>
+            <li><a href="#" onclick="showSection('claims')">📝 Claims</a></li>
+            <li><a href="#" onclick="showSection('vehicles')">📝 Vehicle</a></li>
+
+            <li><a href="#" onclick="showSection('plansadd')">➕ Add Plan</a></li>
+            <li><a href="#" class="logout">🔴 Logout</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Dashboard -->
+        <section id="dashboard" class="section active">
+            <h1>📊 Dashboard</h1>
+            <div class="cards">
+                <div class="card">Total Policies: <span id="totalPolicies">0</span></div>
+                <div class="card">Pending Claims: <span id="activeClaims">0</span></div>
+                <div class="card">Pending Approvals: <span id="pendingPolicies">0</span></div>
+                <div class="card">Vehicles: <span id="totalVehicles">0</span></div>
+                <div class="card">Plans: <span id="totalPlans">0</span></div>
+                <div class="card">Total Amount Insured: <span id="totalPolicyAmount">0</span></div>
+                <div class="card">Total user: <span id="totalUsers">0</span></div>
+                <div class="card">Policy Rejected: <span id="policyrejected">0</span></div>
+                <div class="card">Total claimed amount: <span id="totalAmountClaimed">0</span></div>
+            </div>
+            <canvas id="insuranceChart"></canvas>
+
+        </section>
+
+        <!-- Policies -->
+        <section id="policies" class="section">
+            <h1>📜 Policy Records</h1>
+            <input type="text" id="searchInput" placeholder="Search Policies..." onkeyup="searchPolicies()">
+            <select id="statusFilter" onchange="filterPolicies()">
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Mobile Number</th>
+                        <th>Vehicle</th>
+                        <th>Policy Number</th>
+    
+                        <th>Policy Type</th>
+                        <th>Premium</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="policyTableBody">
+                    <!-- Data will be inserted here -->
+                </tbody>
+            </table>
+        </section>
+
+        <section id="vehicles" class="section" >
+            <h2>🚗 Your Vehicles</h2>
+            <input type="text" id="searchInputVehicle" placeholder="Search vehicles..." />
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Model</th>
+                        <th>License Plate</th>
+                        <th>Year</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="vehiclesTable"></tbody>
+            </table>
+        </section>
+       
+        
+        <section id="plans" class="section">
+            <h1>📜 Plan</h1>
+            <input type="text" id="searchInputplan" placeholder="Search plans..." />
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Coverage</th>
+                        <th>Premium</th>
+                        <th>Duration</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="plansTable"></tbody>
+            </table>
+        </section>
+
+        <!-- Edit Plan Modal -->
+<div id="editPlanModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Edit Plan</h2>
+        <input type="hidden" id="planId">
+        <label>Name: <input type="text" id="planName"></label><br>
+        <label>Coverage: <input type="text" id="planCoverage"></label><br>
+        <label>Premium: <input type="number" id="planPremium"></label><br>
+        <label>Duration: <input type="text" id="planDuration"></label><br>
+        <button onclick="updatePlan()">Update Plan</button>
+    </div>
+</div>
+
+        
+
+        <!-- Claims -->
+        <section id="claims" class="section">
+            <h1>📝 Claim Records</h1>
+            <input type="text" id="searchClaimInput" placeholder="Search Claims..." onkeyup="searchClaims()">
+            <select id="claimStatusFilter" onchange="searchClaims()">
+                <option value="all">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+            <table>
+                <thead>
+                    <tr>
+                    <th>Claim ID</th>
+                    <th>Policy ID</th>
+                    <th>Reason</th>
+                    <th>Amount</th>
+                    <th>Documents</th>
+                    <th>Status</th>
+
+                    <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="claimTableBody">
+                    <!-- Data will be inserted here -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Edit Policy Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Policy</h3>
+
+            <label for="editname">Name:</label>
+            <input type="text" id="editname">
+
+            <label for="editmobilenumber">Mobile Number:</label>
+            <input type="number" id="editmobilenumber">
+
+            <label for="editemail">Email:</label>
+            <input type="email" id="editemail">
+            
+            <label for="editPolicyType">Policy Type:</label>
+            <input type="text" id="editPolicyType">
+
+            <label for="editPremium">Premium:</label>
+            <input type="number" id="editPremium">
+
+            <label for="editStartDate">Start Date:</label>
+            <input type="date" id="editStartDate">
+
+            <label for="editEndDate">End Date:</label>
+            <input type="date" id="editEndDate">
+
+            <label for="editStatus">Status:</label>
+            <select id="editStatus">
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+
+            <button onclick="savePolicyChanges()">Save Changes</button>
+            <button onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    
+        <!-- Add Plan -->
+        <section id="plansadd" class="section">
+            <h1>➕ Add New Plan</h1>
+            <input type="text" id="planName" placeholder="Plan Name">
+            <input type="text" id="planCoverage" placeholder="Coverage">
+            <input type="number" id="planPremium" placeholder="Premium">
+            <input type="number" id="planDuration" placeholder="Duration (Years)">
+            <textarea id="planDetails" placeholder="Plan Details"></textarea>
+            <button onclick="addPlan()">Submit Plan</button>
+        </section>
+
+    </main>
+
+    <script src="admin.js"></script>
+<script>
+    // Function to switch sections
+function showSection(sectionId) {
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.getElementById(sectionId).classList.add('active');
+}
+
+document.getElementById("searchInput").addEventListener("keyup", function () {
+    let filter = this.value.toLowerCase();
+    let rows = document.querySelectorAll("#vehiclesTable tr");
+
+    rows.forEach(row => {
+        let text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
+});
+
+async function fetchDashboardStats() {
+    try {
+        const response = await fetch("http://localhost:5000/api/dashboard/stats");
+        const data = await response.json();
+
+        document.getElementById("totalPolicies").innerText = data.totalPolicies;
+        document.getElementById("activeClaims").innerText = data.activeClaims;
+        document.getElementById("pendingPolicies").innerText = data.pendingPolicies;
+        document.getElementById("totalVehicles").innerText = data.totalVehicles;
+        document.getElementById("totalUsers").innerText = data.totalUsers;
+        document.getElementById("totalPlans").innerText = data.totalPlans;
+        document.getElementById("policyrejected").innerText = data.policyrejected;
+        document.getElementById("totalPolicyAmount").innerText = `$${data.totalPolicyAmount}`;
+        document.getElementById("totalAmountClaimed").innerText = `$${data.totalAmountClaimed}`;
+    } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+    }
+}
+
+// Call the function when the page loads
+window.onload = fetchDashboardStats;
+
+// Example: Simulating dynamic data insertion
+document.getElementById("totalPolicies").innerText = "150";
+document.getElementById("activeClaims").innerText = "25";
+document.getElementById("pendingPolicies").innerText = "10";
+
+document.getElementById("menu-toggle").addEventListener("click", function () {
+    document.querySelector(".sidebar").classList.toggle("open");
+    document.querySelector(".sidebar").classList.toggle("close1");
+});
+
+  // Add Plan Functionality
+async function addPlan() {
+    const newPlan = {
+        name: document.getElementById("planName").value,
+        coverage: document.getElementById("planCoverage").value,
+        premium: document.getElementById("planPremium").value,
+        duration: document.getElementById("planDuration").value,
+        details: document.getElementById("planDetails").value
+    };
+
+    try {
+        const response = await fetch("http://localhost:5000/api/plan/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newPlan)
+        });
+
+        if (!response.ok) throw new Error("Failed to add plan");
+
+        //fetchPlans(); // Refresh the list
+        clearFormFields();
+    } catch (error) {
+        console.error("Error adding plan:", error);
+    }
+}
+
+function clearFormFields() {
+    document.getElementById("planName").value = "";
+    document.getElementById("planCoverage").value = "";
+    document.getElementById("planPremium").value = "";
+    document.getElementById("planDuration").value = "";
+    document.getElementById("planDetails").value = "";
+}
+ 
+</script>
+
+</body>
+</html>
+
+<style>
+    /* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    background: #f4f6f9;
+}
+/* Sidebar */
+aside {
+    width: 250px;
+    background: linear-gradient(135deg, #007BFF, #6610F2); /* Blue to Purple */
+    color: white;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+aside ul {
+    list-style: none;
+}
+
+aside ul li {
+    margin: 5px 0;
+}
+
+aside ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+    background: #6f77ef;
+    text-align: center;
+    border-radius: 5px;
+}
+
+aside ul li a:hover {
+    background: #007bff;
+}
+
+.sidebar {
+    width: 250px;
+    background: #007BFF;
+    color: white;
+    padding: 20px;
+    height: 100vh;
+    position: fixed;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.sidebar li:hover, .sidebar .active {
+    background: #0056b3;
+}
+
+.sidebar {
+    width: 250px;
+    background: #007BFF;
+    color: white;
+    padding: 20px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s, transform 0.2s;
+    
+}
+
+.sidebar li:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+}
+
+.sidebar li.active {
+    background: white;
+    color: #007BFF;
+    font-weight: bold;
+}
+
+/* Responsive Sidebar */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+}
+.sidebar {
+    background: linear-gradient(135deg, #007BFF, #6610F2); /* Blue to Purple */
+}
+
+.sidebar li:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+.sidebar li.active {
+    background: white;
+    color: #007BFF;
+}
+
+
+.logout-btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
+    background: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Transparent dark background */
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    width: 40%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+
+/* Main Content */
+main {
+    margin-left: 280px;
+    padding: 20px;
+    width: 100%;
+}
+
+/* Sections */
+.section {
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+
+/* Show active section */
+.section.active {
+    display: block;
+}
+
+/* Dashboard Cards */
+.cards {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.card {
+    flex: 1;
+    padding: 20px;
+    background: white;
+    color: #333;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.card:hover {
+    background: #1abc9c;
+    color: white;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    margin-top: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background: #3498db;
+    color: white;
+}
+
+tbody tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+tbody tr:hover {
+    background: #f1c40f;
+    color: black;
+    transition: 0.3s;
+}
+
+/* Search & Filters */
+input, select {
+    padding: 10px;
+    margin: 10px 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* Buttons */
+button {
+    padding: 12px;
+    background: #3498db;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 50px;
+    width: auto;
+    margin-right: 10px;
+}
+
+
+</style>

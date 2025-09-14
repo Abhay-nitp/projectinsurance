@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="dashboard.js"></script>
+
+</head>
+<body>
+    <script>
+        async function fetchRenewalHistory(policyId) {
+    try {
+        const response = await fetch(`http://localhost:5000/api/insurance/${policyId}`);
+        const policy = await response.json();
+
+        if (!policy.renewalHistory || policy.renewalHistory.length === 0) {
+            document.getElementById("renewalHistory").innerHTML = "<p>No renewal history found.</p>";
+            return;
+        }
+
+        let historyHTML = "<h3>Renewal History</h3><ul>";
+        policy.renewalHistory.forEach((renewal) => {
+            historyHTML += `
+                <li>
+                    <strong>Date:</strong> ${new Date(insurance.renewedAt).toLocaleDateString()}<br>
+                    <strong>Amount Paid:</strong> $${renewal.amountPaid}<br>
+                    <strong>New Expiry:</strong> ${new Date(renewal.newEndDate).toLocaleDateString()}
+                </li><hr>
+            `;
+        });
+        historyHTML += "</ul>";
+
+        document.getElementById("renewalHistory").innerHTML = historyHTML;
+    } catch (error) {
+        console.error("Error fetching renewal history:", error);
+    }
+}
+
+        async function fetchPolicies() {
+    const response = await fetch("http://localhost:5000/api/insurance");
+    const policies = await response.json();
+
+    const policiesSection = document.getElementById("policiesContainer");
+    policiesSection.innerHTML = "";
+
+    policies.forEach(policy => {
+        const policyCard = `
+            <div class="card">
+                <h3>Policy - ${policy._id}</h3>
+                <h3 class="card1">${policy.coverage}</h3>
+                <p class="card1">Premium: $${policy.finalQuote}</p>
+                <p class="card1">Expiry: ${new Date(policy.endDate).toLocaleDateString()}</p>
+                <button onclick="renewPolicy('${policy._id}', ${policy.finalQuote})">Renew Plan</button>
+                <button onclick="fetchRenewalHistory('${policy._id}')">View Renewal History</button>
+            </div>
+        `;
+        policiesSection.innerHTML += policyCard;
+    });
+}
+
+    </script>
+    <section id="renewalHistorySection" class="section">
+        <h2>Renewal History</h2>
+        <div id="renewalHistory">Loading...</div>
+    </section>
+    
+    <aside class="sidebar">
+        <h2>🚗 Vaahaan Admin</h2>
+        <ul>
+            <li onclick="showSection('dashboard')" class="active">📊 Dashboard</li>
+            <li onclick="showSection('policies')">📜 Policies</li>
+            <li onclick="showSection('claims')">🛠️ Claims</li>
+            <li onclick="showSection('users')">👥 Users</li>
+            <li onclick="showSection('settings')">⚙️ Settings</li>
+        </ul>
+        <button class="logout-btn">🚪 Logout</button>
+    </aside>
+    <input type="text" id="searchClaimInput" placeholder="Search Claims..." onkeyup="searchClaims()">
+</body>
+</html>
+<style>
+    .sidebar {
+    width: 250px;
+    background: #007BFF;
+    color: white;
+    padding: 20px;
+    height: 100vh;
+    position: fixed;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.sidebar li:hover, .sidebar .active {
+    background: #0056b3;
+}
+
+.logout-btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
+    background: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+</style>

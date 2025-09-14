@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | XYZ Insurance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav>
+       
+            <div class="logo-container">
+                <img class="logo" src="abc_logo.png" alt="Vaahaan Insurance Logo">
+                <div class="brand-name">Vaahaan Insurance</div>
+            </div>
+        
+        <!-- <div class="logo">🚗 Vaahaan Insurance - Admin</div> -->
+        <ul>
+            <li><a href="dashboard.html">User Dashboard</a></li>
+            <li><a href="#" class="btn-primary">Logout</a></li>
+        </ul>
+    </nav>
+
+
+
+    <!-- Admin Dashboard -->
+    <section class="admin-dashboard">
+        <h2>📜 Policy Records</h2>
+            <!-- Search Bar -->
+    <input type="text" id="searchInput" placeholder="Search Policies..." onkeyup="searchPolicies()">
+    <label for="statusFilter">Filter by Status:</label>
+    <select id="statusFilter" onchange="filterPolicies()">
+        <option value="all">All</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+    </select>
+        <table>
+            <thead>
+                <tr>
+                    <th>Full name</th>
+                    <th>email</th>
+                    <th>Mobile Number</th>
+                    <th>Policy Number</th>
+
+                    <th>Policy Type</th>
+                    <th>Premium</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="policyTableBody">
+                <!-- Data from MongoDB will be inserted here -->
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Edit Policy Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Policy</h3>
+
+            <label for="editname">Premium:</label>
+            <input type="text" id="editname">
+
+            <label for="editmobilenumber">Premium:</label>
+            <input type="number" id="editmobilenumber">
+
+            <label for="editemail">Premium:</label>
+            <input type="email" id="editemail">
+            
+            <label for="editPolicyType">Policy Type:</label>
+            <input type="text" id="editPolicyType">
+
+            <label for="editPremium">Premium:</label>
+            <input type="number" id="editPremium">
+
+            <label for="editStartDate">Start Date:</label>
+            <input type="date" id="editStartDate">
+
+            <label for="editEndDate">End Date:</label>
+            <input type="date" id="editEndDate">
+
+            <label for="editStatus">Status:</label>
+            <select id="editStatus">
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+
+            <button onclick="savePolicyChanges()">Save Changes</button>
+            <button onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    
+    <section class="admin-dashboard">
+        <h2>📜 Claim Records</h2>
+        
+    <!-- Search Bar -->
+    <input type="text" id="searchClaimInput" placeholder="Search Claims..." onkeyup="searchClaims()">
+    <label for="claimStatusFilter">Filter by Status:</label>
+    <select id="claimStatusFilter" onchange="searchClaims()">
+        <option value="all">All</option>
+        <option value="Pending">Pending</option>
+        <option value="Approved">Approved</option>
+        <option value="Rejected">Rejected</option>
+    </select>
+        <table>
+            <thead>
+                <tr>
+                    <th>Claim ID</th>
+                    <th>Policy ID</th>
+                    <th>Reason</th>
+                    <th>Amount</th>
+                    <th>Documents</th>
+                    <th>Status</th>
+
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="claimTableBody">
+                <!-- Data from MongoDB will be inserted here -->
+            </tbody>
+        </table>
+    </section>
+    
+    <!-- Edit Claim Modal -->
+    <div id="editClaimModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Claim</h3>
+            <label for="editClaimReason">Claim Reason:</label>
+            <input type="text" id="editClaimReason">
+    
+            <label for="editClaimAmount">Claim Amount:</label>
+            <input type="number" id="editClaimAmount">
+    
+            <label for="editClaimStatus">Status:</label>
+            <select id="editClaimStatus">
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+    
+            <button onclick="saveClaimChanges()">Save Changes</button>
+            <button onclick="closeClaimModal()">Cancel</button>
+        </div>
+    </div>
+
+   <!-- Add Plan Section -->
+   <section class="add-plan">
+    <h2>Add New Plan</h2>
+    <input type="text" id="planName" placeholder="Plan Name">
+    <input type="text" id="planCoverage" placeholder="Coverage">
+    <input type="number" id="planPremium" placeholder="Premium">
+    <input type="number" id="planDuration" placeholder="Duration (Years)">
+    <textarea id="planDetails" placeholder="Plan Details"></textarea>
+    <button onclick="addPlan()">Submit Plan</button>
+</section>
+    
+<script src="admin.js"></script>
+    <script>
+        
+//         let editPolicyId = null; // To track the policy being edited
+
+//         async function fetchPolicies() {
+//             try {
+//                 const response = await fetch("http://localhost:5000/api/policies");
+//                 const policies = await response.json();
+
+//                 const tableBody = document.getElementById("policyTableBody");
+//                 tableBody.innerHTML = ""; // Clear existing data
+
+//                 policies.forEach(policy => {
+//                     const row = `
+//                         <tr>
+//                             <td>${policy.policyNumber || "N/A"}</td>
+//                             <td>${policy.coverageType || policy.policy_type}</td>
+//                             <td>$${policy.premiumAmount || policy.premium}</td>
+//                             <td>${new Date(policy.startDate || policy.start_date).toLocaleDateString()}</td>
+//                             <td>${new Date(policy.endDate || policy.end_date).toLocaleDateString()}</td>
+//                             <td>${policy.status || "Active"}</td>
+//                             <td>
+//                                 <button onclick="editPolicy('${policy._id}', '${policy.coverageType || policy.policy_type}', '${policy.premiumAmount || policy.premium}', '${policy.startDate || policy.start_date}', '${policy.endDate || policy.end_date}', '${policy.status}')">✏️ Edit</button>
+//                                 <button onclick="deletePolicy('${policy._id}')">🗑️ Delete</button>
+//                             </td>
+//                         </tr>
+//                     `;
+//                     tableBody.innerHTML += row;
+//                 });
+//             } catch (error) {
+//                 console.error("Error fetching policies:", error);
+//             }
+//         }
+
+//         function editPolicy(id, type, premium, startDate, endDate, status) {
+//             editPolicyId = id;
+//             document.getElementById("editPolicyType").value = type;
+//             document.getElementById("editPremium").value = premium;
+//             document.getElementById("editStartDate").value = startDate.split("T")[0];
+//             document.getElementById("editEndDate").value = endDate.split("T")[0];
+//             document.getElementById("editStatus").value = status;
+//             document.getElementById("editModal").style.display = "block";
+//         }
+
+//         async function savePolicyChanges() {
+//     if (!editPolicyId) return;
+
+//     const updatedPolicy = {
+//         coverageType: document.getElementById("editPolicyType").value,
+//         premiumAmount: document.getElementById("editPremium").value,
+//         startDate: document.getElementById("editStartDate").value,
+//         endDate: document.getElementById("editEndDate").value,
+//         status: document.getElementById("editStatus").value
+//     };
+
+//     try {
+//         const response = await fetch(`http://localhost:5000/api/policies/${editPolicyId}`, {
+//             method: "PUT",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify(updatedPolicy)
+//         });
+
+//         if (response.ok) {
+//             alert("Policy updated successfully!");
+//             closeModal();
+//             fetchPolicies();
+//         } else {
+//             const errorData = await response.json();
+//             alert(`Failed to update policy: ${errorData.message}`);
+//         }
+//     } catch (error) {
+//         console.error("Error updating policy:", error);
+//         alert("An error occurred while updating the policy.");
+//     }
+// }
+
+
+//         async function deletePolicy(id) {
+//             if (!confirm("Are you sure you want to delete this policy?")) return;
+
+//             try {
+//                 const response = await fetch(`http://localhost:5000/api/policies/${id}`, { method: "DELETE" });
+
+//                 if (response.ok) {
+//                     alert("Policy deleted successfully!");
+//                     fetchPolicies();
+//                 } else {
+//                     alert("Failed to delete policy.");
+//                 }
+//             } catch (error) {
+//                 console.error("Error deleting policy:", error);
+//             }
+//         }
+
+//         function closeModal() {
+//             document.getElementById("editModal").style.display = "none";
+//             editPolicyId = null;
+//         }
+
+//         document.addEventListener("DOMContentLoaded", fetchPolicies);
+
+
+//         //claim
+//         document.addEventListener("DOMContentLoaded", async function () {
+//     const token = localStorage.getItem("token");
+
+//     try {
+//         const response = await fetch("http://localhost:5000/api/admin/claim", {
+//             method: "GET",
+//             headers: {
+//                 "Authorization": `Bearer ${token}`,
+//                 "Content-Type": "application/json"
+//             }
+//         });
+
+//         const claims = await response.json();
+//         displayAdminClaims(claims);
+//     } catch (error) {
+//         console.error("Error fetching claims:", error);
+//         alert("Error fetching claims: " + error.message);
+//     }
+// });
+
+// function displayAdminClaims(claims) {
+//     const container = document.getElementById("adminClaimsContainer");
+//     container.innerHTML = "";
+
+//     claims.forEach(claim => {
+//         const claimDiv = document.createElement("div");
+//         claimDiv.classList.add("claim-card");
+//         claimDiv.innerHTML = `
+//             <p><strong>User:</strong> ${claim.user.name} (${claim.user.email})</p>
+//             <p><strong>Policy ID:</strong> ${claim.policy._id}</p>
+//             <p><strong>Reason:</strong> ${claim.claim_reason}</p>
+//             <p><strong>Amount:</strong> ₹${claim.claim_amount}</p>
+//             <p><strong>Status:</strong> ${claim.claim_status}</p>
+//             <p><a href="${claim.documents}" target="_blank">View Documents</a></p>
+//             <button onclick="updateClaimStatus('${claim._id}', 'Approved')">Approve</button>
+//             <button onclick="updateClaimStatus('${claim._id}', 'Rejected')">Reject</button>
+//         `;
+//         container.appendChild(claimDiv);
+//     });
+// }
+
+// // Function to update claim status
+// async function updateClaimStatus(claimId, status) {
+//     const token = localStorage.getItem("token");
+
+//     try {
+//         const response = await fetch(`http://localhost:5000/api/claim/update/${claimId}`, {
+//             method: "PATCH",
+//             headers: {
+//                 "Authorization": `Bearer ${token}`,
+//                 "Content-Type": "application/json"
+//             },
+//             body: JSON.stringify({ claim_status: status })
+//         });
+
+//         const data = await response.json();
+//         if (!response.ok) throw new Error(data.message);
+
+//         alert(`Claim ${status} successfully!`);
+//         location.reload();
+//     } catch (error) {
+//         console.error("Error updating claim:", error);
+//         alert("Failed to update claim: " + error.message);
+//     }
+// }
+// Add Plan Functionality
+async function addPlan() {
+    const newPlan = {
+        name: document.getElementById("planName").value,
+        coverage: document.getElementById("planCoverage").value,
+        premium: document.getElementById("planPremium").value,
+        duration: document.getElementById("planDuration").value,
+        details: document.getElementById("planDetails").value
+    };
+
+    try {
+        const response = await fetch("http://localhost:5000/api/plan/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newPlan)
+        });
+
+        if (!response.ok) throw new Error("Failed to add plan");
+
+        //fetchPlans(); // Refresh the list
+        clearFormFields();
+    } catch (error) {
+        console.error("Error adding plan:", error);
+    }
+}
+
+function clearFormFields() {
+    document.getElementById("planName").value = "";
+    document.getElementById("planCoverage").value = "";
+    document.getElementById("planPremium").value = "";
+    document.getElementById("planDuration").value = "";
+    document.getElementById("planDetails").value = "";
+}
+    </script>
+
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+        th { background-color: #007bff; color: white; }
+        button { padding: 5px 10px; cursor: pointer; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; box-shadow: 0px 4px 6px rgba(0,0,0,0.1); }
+        .modal-content { display: flex; flex-direction: column; }
+        .modal input, .modal select { margin: 5px 0; padding: 8px; }
+    </style>
+    <style>/* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+        
+        /* Header */
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .home-btn {
+            text-decoration: none;
+            color: white;
+            background-color: #ff9800;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+        
+        /* Plans Table */
+        .plans-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 7px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #218838;
+        }
+        
+        /* Add Plan Section */
+        .add-plan {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            text-align: left;
+        }
+        
+        .add-plan h2 {
+            text-align: center;
+        }
+        
+        input, textarea {
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+/* Search Bar */
+#searchInput {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+
+/* Filter Dropdown */
+#statusFilter {
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* Search Bar & Filter */
+#searchClaimInput,#claimStatusFilter  {
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+
+
+    </style>
+</body>
+</html>

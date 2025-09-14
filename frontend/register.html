@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Vehicle Insurance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            background: linear-gradient(135deg, #4CAF50, #2196F3);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            border: none;
+            color: white;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        p {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <div class="container">
+        <h2>Register for Vehicle Insurance</h2>
+        <form id="registerForm">
+            <input type="text" id="name" placeholder="Full Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="text" id="phone" placeholder="Phone Number" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Register</button>
+        </form>
+        <p>Already have an account? <a href="login.html">Login</a></p>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+    try {
+        const response = await fetch("http://localhost:5000/api/auth/me", {
+            method: "GET",
+            credentials: "include", // Send cookies with request
+        });
+
+        if (response.ok) {
+            const user = await response.json();
+            console.log("Auth response:", user); // ✅ Log API response
+            // Hide login/signup, show account/logout
+           window.location.href = "index.html";
+        } else {
+            // Show login/signup if user is NOT authenticated
+            
+        }
+    } catch (error) {
+        console.error("Error fetching user:", error);
+    }
+});
+
+        // document.getElementById("registerForm").addEventListener("submit", async function (e) {
+        //     e.preventDefault();
+            
+        //     const name = document.getElementById("name").value;
+        //     const email = document.getElementById("email").value;
+        //     const phone = document.getElementById("phone").value;
+        //     const password = document.getElementById("password").value;
+
+        //    try{ const response = await fetch("http://localhost:5000/api/auth/register", {
+        //         method: "POST",
+        //         headers: { "Content-Type": "application/json" },
+        //         body: JSON.stringify({ name, email, phone, password })
+        //     });
+
+        //     const data = await response.json();
+
+        //     // if (data.message === "User registered successfully") {
+        //     //     alert("Registration successful! Please login.");
+        //     //     window.location.href = "index.html";
+        //     // } else {
+        //     //     alert("Error: " + data.message);
+        //     // }
+        //     if (response.ok) { 
+        //             alert("Registration successful! Please login.");
+        //             window.location.href = "index.html"; 
+        //         } else {
+        //             alert("Error: " + data.message);
+        //         }
+        //     } catch (error) {
+        //         console.error("Error:", error);
+        //         alert("Failed to register. Please try again.");
+        //     }
+        // });
+
+        document.getElementById("registerForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;
+    const password = document.getElementById("password").value;
+
+    try {
+        const response = await fetch("http://localhost:5000/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, phone, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert("Registration successful! Please check your email to verify your account.");
+            window.location.href = "login.html";
+        } else {
+            alert("Error: " + data.message);
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to register. Please try again.");
+    }
+});
+
+    </script>
+
+</body>
+</html>

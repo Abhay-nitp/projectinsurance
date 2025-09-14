@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Policy Confirmation | XYZ Insurance</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav>
+        <div class="logo-container">
+            <img class="logo" src="abc_logo.png" alt="Vaahaan Insurance Logo">
+            <div class="brand-name">Vaahaan Insurance</div>
+        </div>
+        <!-- <img class="logo" src="abc_logo.png" alt="Vaahaan Insurance Logo"> -->
+
+        <!-- <div class="logo">🚗 Vaahaan Insurance</div> -->
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="dashboard.html" class="btn-primary">Dashboard</a></li>
+        </ul>
+    </nav>
+
+    <!-- Policy Confirmation Section -->
+    <section class="policy-confirmation">
+        <div class="confirmation-box">
+            <h2>🎉 Policy Purchased Successfully!</h2>
+            <p>Thank you for choosing XYZ Insurance. Here are your policy details:</p>
+
+            <div class="policy-details">
+                <p><strong>Policy Holder:</strong> <span id="fullName"></span></p>
+                <p><strong>Email:</strong> <span id="email"></span></p>
+                <p><strong>Phone:</strong> <span id="phone"></span></p>
+                <p><strong>Plate Number:</strong> <span id="vehicleId"></span></p>
+                <p><strong>Plan Id:</strong> <span id="planid"></span></p>
+                <p><strong>Vehicle Type:</strong> <span id="vehicleType"></span></p>
+                <p><strong>Vehicle Age:</strong> <span id="vehicleAge"></span> years</p>
+                <p><strong>Coverage Type:</strong> <span id="coverage"></span></p>
+                <p><strong>ZIP Code:</strong> <span id="zipCode"></span></p>
+                <p><strong>Quoted Price:</strong> <span id="finalQuote"></span></p>
+                <p><strong>Payment Method:</strong> <span id="paymentMethod"></span></p>
+            </div>
+
+            <!-- Policy Summary Section -->
+            <div class="policy-summary">
+                <h3>📜 Policy Summary</h3>
+                <p><strong>Policy Number:</strong> <span id="policyNumber"></span></p>
+                <p><strong>Policy Start Date:</strong> <span id="startDate"></span></p>
+                <p><strong>Policy Expiry Date:</strong> <span id="expiryDate"></span></p>
+            </div>
+
+            <button class="btn-cta" onclick="downloadPolicyPDF()">📄 Download Policy PDF</button>
+        </div>
+    </section>
+
+    <!-- Next Steps Section -->
+    <section class="next-steps">
+        <h2>🔜 Next Steps</h2>
+        <div class="step-box">
+            <h3>🔄 Renew Your Policy</h3>
+            <p>Stay protected by renewing your policy before expiry.</p>
+            <button class="btn-secondary" onclick="window.location.href='dashboard.html'">Renew Now</button>
+        </div>
+
+        <div class="step-box">
+            <h3>🛠 Manage Your Claims</h3>
+            <p>Need to file a claim? Start your process here.</p>
+            <button class="btn-secondary" onclick="window.location.href='claimForm.html'">File a Claim</button>
+        </div>
+    </section>
+
+    <!-- Customer Support Section -->
+    <section class="customer-support">
+        <h2>📞 Need Help?</h2>
+        <p>Contact our 24/7 support team for assistance.</p>
+        <button class="btn-support" onclick="window.location.href='dashboard.html'">Contact Support</button>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Vaahaan Insurance | All Rights Reserved</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+    try {
+        const response = await fetch("http://localhost:5000/api/insurance/latest", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: 'Bearer ' + localStorage.getItem('token') // If using JWT for authentication// Include token in headers
+      },
+    });
+        
+        const policy = await response.json();
+
+        if (response.ok) {
+            document.getElementById("fullName").textContent = policy.fullName;
+            document.getElementById("email").textContent = policy.email;
+            document.getElementById("phone").textContent = policy.phone;
+           
+            document.getElementById("vehicleType").textContent = policy.vehicleType ;
+            document.getElementById("vehicleAge").textContent = policy.vehicleAge || "N/A";
+            document.getElementById("coverage").textContent = policy.coverage;
+            document.getElementById("zipCode").textContent = policy.zipCode;
+            document.getElementById("finalQuote").textContent = `$${policy.finalQuote}`;
+            document.getElementById("paymentMethod").textContent = policy.paymentMethod || "N/A";
+
+            document.getElementById("policyNumber").textContent = policy.policyNumber;
+            document.getElementById("startDate").textContent = new Date(policy.startDate).toLocaleDateString();
+            document.getElementById("expiryDate").textContent = new Date(policy.endDate).toLocaleDateString();
+            document.getElementById("vehicleId").textContent = policy.vehicle;
+            document.getElementById("planid").textContent = policy.planId;
+            
+            
+        } else {
+            alert("Error fetching policy details: " + policy.message);
+        }
+    } catch (error) {
+        console.error("Error fetching policy details:", error);
+        alert("An error occurred while loading policy details.");
+    }
+});
+function downloadPolicyPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Fetch policy details
+    const fullName = document.getElementById("fullName").textContent;
+    const email = document.getElementById("email").textContent;
+    const phone = document.getElementById("phone").textContent;
+    const vehicleType = document.getElementById("vehicleType").textContent;
+    const vehicleAge = document.getElementById("vehicleAge").textContent;
+    const coverage = document.getElementById("coverage").textContent;
+    const zipCode = document.getElementById("zipCode").textContent;
+    const finalQuote = document.getElementById("finalQuote").textContent;
+    const paymentMethod = document.getElementById("paymentMethod").textContent;
+    const policyNumber = document.getElementById("policyNumber").textContent;
+    const startDate = document.getElementById("startDate").textContent;
+    const expiryDate = document.getElementById("expiryDate").textContent;
+
+    // PDF Content
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("XYZ Insurance - Policy Confirmation", 20, 20);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`Policy Holder: ${fullName}`, 20, 40);
+    doc.text(`Email: ${email}`, 20, 50);
+    doc.text(`Phone: ${phone}`, 20, 60);
+    doc.text(`Vehicle Type: ${vehicleType}`, 20, 70);
+    doc.text(`Vehicle Age: ${vehicleAge} years`, 20, 80);
+    doc.text(`Coverage Type: ${coverage}`, 20, 90);
+    doc.text(`ZIP Code: ${zipCode}`, 20, 100);
+    doc.text(`Quoted Price: ${finalQuote}`, 20, 110);
+    doc.text(`Payment Method: ${paymentMethod}`, 20, 120);
+    
+    doc.setFont("helvetica", "bold");
+    doc.text("Policy Summary:", 20, 140);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Policy Number: ${policyNumber}`, 20, 150);
+    doc.text(`Policy Start Date: ${startDate}`, 20, 160);
+    doc.text(`Policy Expiry Date: ${expiryDate}`, 20, 170);
+
+    // Footer
+    doc.setFontSize(10);
+    doc.text("Thank you for choosing XYZ Insurance!", 20, 190);
+
+    // Save the PDF
+    doc.save(`Policy_${policyNumber}.pdf`);
+}
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const policyData = JSON.parse(localStorage.getItem("policyData"));
+
+            if (policyData) {
+                document.getElementById("fullName").textContent = policyData.fullName;
+                document.getElementById("email").textContent = policyData.email;
+                document.getElementById("phone").textContent = policyData.phone;
+                document.getElementById("vehicleType").textContent = policyData.vehicleType;
+                document.getElementById("vehicleAge").textContent = policyData.vehicleAge;
+                document.getElementById("coverage").textContent = policyData.coverage;
+                document.getElementById("zipCode").textContent = policyData.zipCode;
+                document.getElementById("finalQuote").textContent = "$" + policyData.finalQuote;
+                document.getElementById("paymentMethod").textContent = policyData.paymentMethod;
+
+                // Generate Random Policy Number
+                document.getElementById("policyNumber").textContent = "XYZ" + Math.floor(Math.random() * 100000);
+                document.getElementById("startDate").textContent = new Date().toLocaleDateString();
+                let expiryDate = new Date();
+                expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+                document.getElementById("expiryDate").textContent = expiryDate.toLocaleDateString();
+            }
+        });
+
+        function downloadPolicyPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(16);
+            doc.text("XYZ Insurance - Policy Confirmation", 20, 20);
+            doc.setFontSize(12);
+            doc.text("Policy Holder: " + document.getElementById("fullName").textContent, 20, 40);
+            doc.text("Email: " + document.getElementById("email").textContent, 20, 50);
+            doc.text("Phone: " + document.getElementById("phone").textContent, 20, 60);
+            doc.text("Vehicle Type: " + document.getElementById("vehicleType").textContent, 20, 70);
+            doc.text("Vehicle Age: " + document.getElementById("vehicleAge").textContent + " years", 20, 80);
+            doc.text("Coverage Type: " + document.getElementById("coverage").textContent, 20, 90);
+            doc.text("ZIP Code: " + document.getElementById("zipCode").textContent, 20, 100);
+            doc.text("Quoted Price: " + document.getElementById("finalQuote").textContent, 20, 110);
+            doc.text("Payment Method: " + document.getElementById("paymentMethod").textContent, 20, 120);
+            doc.text("Policy Number: " + document.getElementById("policyNumber").textContent, 20, 130);
+            doc.text("Start Date: " + document.getElementById("startDate").textContent, 20, 140);
+            doc.text("Expiry Date: " + document.getElementById("expiryDate").textContent, 20, 150);
+
+            doc.save("XYZ_Insurance_Policy.pdf");
+        }
+    </script>
+
+</body>
+</html>
+<style>/* General Styles */
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f7fa;
+        color: #333;
+    }
+    
+    /* Navbar */
+    nav {
+        background: #007bff;
+        color: white;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    nav .logo {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+    
+    nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+    }
+    
+    nav ul li {
+        margin: 0 10px;
+    }
+    
+    nav ul li a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s;
+    }
+    
+    nav ul li a:hover {
+        color: #ffdd57;
+    }
+    
+    .btn-primary {
+        background: white;
+        color: #007bff;
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+    
+    .btn-primary:hover {
+        background: #ffdd57;
+        color: #007bff;
+    }
+    
+    /* Confirmation Box */
+    .policy-confirmation {
+        text-align: center;
+        padding: 50px 20px;
+    }
+    
+    .confirmation-box {
+        background: white;
+        padding: 20px;
+        max-width: 600px;
+        margin: auto;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+    
+    .policy-details, .policy-summary {
+        text-align: left;
+        margin: 20px 0;
+    }
+    
+    .policy-details p, .policy-summary p {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    
+    /* Buttons */
+    .btn-cta {
+        background: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.3s;
+    }
+    
+    .btn-cta:hover {
+        background: #218838;
+    }
+    
+    /* Next Steps Section */
+    .next-steps {
+        text-align: center;
+        padding: 40px 20px;
+        background: #fff;
+    }
+    
+    .step-box {
+        display: inline-block;
+        background: #f8f9fa;
+        padding: 20px;
+        margin: 10px;
+        border-radius: 10px;
+        width: 250px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-secondary {
+        background: #007bff;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .btn-secondary:hover {
+        background: #0056b3;
+    }
+    
+    /* Customer Support Section */
+    .customer-support {
+        text-align: center;
+        padding: 30px 20px;
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-support {
+        background: white;
+        color: #007bff;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    .btn-support:hover {
+        background: #ffdd57;
+        color: #007bff;
+    }
+    
+    /* Footer */
+    footer {
+        text-align: center;
+        padding: 20px;
+        background: #343a40;
+        color: white;
+    }
+    .logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 50px;
+    width: auto;
+    margin-right: 10px;
+}
+
+.brand-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+    </style>
